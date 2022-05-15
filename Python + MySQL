@@ -1,0 +1,30 @@
+import serial
+import MySQLdb # comando de instalación de librería: pip install mysqlclient, correr el programa, cerrar y volver abrir el visual code y ya reconocera la libreria sin problemas
+import mysql.connector
+
+# dbConn = MySQLdb.connect("localhost","database_username","password","database_name") 
+dbConn = mysql.connector.connect(host='localhost', user='arduino',password='',database='pythonbd')
+# se abre un cursor, al cursor de la base de datos
+mycursor = dbConn.cursor()
+
+device = 'COM5'
+
+try:
+    print("Conectado a la base de datos en MySQL")
+    print("Conectado puerto...",device)
+    arduino = serial.Serial(device,9600)
+except:
+    print("Fallo la conexion con el puerto ")
+
+
+try:
+    data = arduino.readline() # lee los datos de las piezas de arduino
+    pieces = data.split("\t") # separa datos por pestaña
+    try:
+        mycursor.execute("INSERT INTO lm35(ID,TEMPERATURA)", "VALUES(%s,%s)", (pieces[0],pieces[1]))
+        dbConn.commit() # hacemos commit del insert
+        mycursor.close()
+    except:
+        print("Fallo inserción")
+except:
+    print("")
